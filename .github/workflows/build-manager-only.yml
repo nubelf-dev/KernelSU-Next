@@ -82,4 +82,4 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.spoofed && 'manager-spoofed' || 'manager' }}
-          path: app/build/outputs/apk/release/*.apk
+          path: manager/app/build/outputs/apk/release/*.apk
