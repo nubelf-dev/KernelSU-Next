@@ -411,7 +411,7 @@ fun UpdateCard() {
     val context = LocalContext.current
     val latestVersionInfo = LatestVersionInfo()
     
-    var preferSpoofed by remember { mutableStateOf(true) }
+    var preferSpoofed by remember { mutableStateOf(false) }
     
     val newVersion by produceState(initialValue = latestVersionInfo, key1 = preferSpoofed) {
         value = withContext(Dispatchers.IO) {
