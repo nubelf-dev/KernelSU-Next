@@ -1242,7 +1242,7 @@ private fun ContributorRow(
     onProfileClick: () -> Unit,
     onDonateClick: () -> Unit
 ) {
-    var imageLoadFailed by remember { mutableStateOf(false) }
+    var imageLoadFailed by remember { mutableStateOf(true) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
