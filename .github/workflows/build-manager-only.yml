@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "manager" ]
     paths:
-      - '.github/workflows/build-manager-branch.yml'
+      - '.github/workflows/build-manager-only.yml'
       - 'manager/**'
   workflow_dispatch:
 
@@ -15,10 +15,6 @@ jobs:
       matrix:
         spoofed: [ false, true ]
 
-    defaults:
-      run:
-        working-directory: ./manager
-
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -27,11 +23,13 @@ jobs:
 
       - name: Spoof Package ID
         if: matrix.spoofed == true
+        working-directory: ./manager
         run: |
           chmod +x next
           ./next
 
       - name: Write key
+        working-directory: ./manager
         run: |
           if [ ! -z "${{ secrets.KEYSTORE }}" ]; then
             {
@@ -57,25 +55,25 @@ jobs:
 
       - name: Download ksud from latest ThRE-Team release
         run: |
-          mkdir -p ../aarch64-linux-android/release
-          mkdir -p ../x86_64-linux-android/release
-          curl -L "https://github.com/ThRE-Team/KernelSU-Next/releases/latest/download/ksud-aarch64-linux-android" \
-            -o ../aarch64-linux-android/release/ksud || \
-          curl -L "https://github.com/KernelSU-Next/KernelSU-Next/releases/latest/download/ksud-aarch64-linux-android" \
-            -o ../aarch64-linux-android/release/ksud
-          curl -L "https://github.com/ThRE-Team/KernelSU-Next/releases/latest/download/ksud-x86_64-linux-android" \
-            -o ../x86_64-linux-android/release/ksud || \
-          curl -L "https://github.com/KernelSU-Next/KernelSU-Next/releases/latest/download/ksud-x86_64-linux-android" \
-            -o ../x86_64-linux-android/release/ksud
+          mkdir -p aarch64-linux-android/release
+          mkdir -p x86_64-linux-android/release
+          LATEST=$(curl -sL "https://api.github.com/repos/ThRE-Team/KernelSU-Next/releases/latest" | grep '"tag_name"' | cut -d'"' -f4)
+          echo "Latest release: $LATEST"
+          curl -fSL "https://github.com/ThRE-Team/KernelSU-Next/releases/download/${LATEST}/ksud-aarch64-linux-android" \
+            -o aarch64-linux-android/release/ksud
+          curl -fSL "https://github.com/ThRE-Team/KernelSU-Next/releases/download/${LATEST}/ksud-x86_64-linux-android" \
+            -o x86_64-linux-android/release/ksud
+          ls -lh aarch64-linux-android/release/ksud x86_64-linux-android/release/ksud
 
       - name: Copy ksud to app jniLibs
         run: |
-          mkdir -p app/src/main/jniLibs/arm64-v8a
-          mkdir -p app/src/main/jniLibs/x86_64
-          cp -f ../aarch64-linux-android/release/ksud app/src/main/jniLibs/arm64-v8a/libksud.so
-          cp -f ../x86_64-linux-android/release/ksud app/src/main/jniLibs/x86_64/libksud.so
+          mkdir -p manager/app/src/main/jniLibs/arm64-v8a
+          mkdir -p manager/app/src/main/jniLibs/x86_64
+          cp -f aarch64-linux-android/release/ksud manager/app/src/main/jniLibs/arm64-v8a/libksud.so
+          cp -f x86_64-linux-android/release/ksud manager/app/src/main/jniLibs/x86_64/libksud.so
 
       - name: Build with Gradle
+        working-directory: ./manager
         run: ./gradlew clean assembleRelease
 
       - name: Upload APK
