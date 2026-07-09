@@ -25,10 +25,7 @@ find . -type f -exec sed -i \
     -e "s/com_rifsxd_ksunext/${word1}_${word2}_${word3}/g" {} +
 
 # Append '-spoofed' to managerVersionName in build.gradle.kts
-if [ -f "./build.gradle.kts" ]; then
-    sed -i 's/\(val managerVersionName by extra(getVersionName())\)/\1\nval managerVersionNameSpoofed = "${managerVersionName}-spoofed"/' ./build.gradle.kts
-    sed -i 's/\(versionName = managerVersionName\)/versionName = managerVersionNameSpoofed/' ./build.gradle.kts
-fi
+# Skip versionName spoofing - using hard-coded version 33200 (v3.3.0)
 
 if [ -f "./app/build.gradle.kts" ]; then
     sed -i '/val managerVersionName:/a val managerVersionNameSpoofed = "${managerVersionName}-enjoy"' ./app/build.gradle.kts
